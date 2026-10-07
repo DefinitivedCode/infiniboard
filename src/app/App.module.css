@@ -1,15 +1,19 @@
 .app { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-.header { min-height: 52px; display: flex; align-items: center; gap: 16px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--surface); z-index: 20; }
+/* Equal flexible side tracks keep navigation centered independently of toolbar content. */
+.header { min-height: 52px; flex-shrink: 0; display: grid; grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr); align-items: center; gap: 16px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--surface); z-index: 20; }
+.projectControls { display: flex; align-items: center; gap: inherit; min-width: 0; }
 .brand { font-family: var(--serif); font-size: 22px; letter-spacing: -.8px; white-space: nowrap; }
 .brandDot { color: var(--accent); }
 .divider { height: 20px; border-left: 1px solid var(--line); }
-.projectTitle { width: 220px; min-width: 60px; border: 0; border-bottom: 1px solid transparent; border-radius: 0; padding: 5px 0; color: var(--ink); background: transparent; font-size: 13px; }
+.projectTitle { width: 220px; min-width: 0; border: 0; border-bottom: 1px solid transparent; border-radius: 0; padding: 5px 0; color: var(--ink); background: transparent; font-size: 13px; }
 .projectTitle:hover { border-bottom-color: var(--line); }
-.tabs { display: flex; align-self: stretch; margin-left: auto; gap: 4px; }
+.tabs { display: flex; align-self: stretch; gap: 4px; }
 .tabs button { padding: 0 20px; border: 0; border-radius: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-size: 13px; }
 .tabs button:hover { color: var(--ink); }
 .tabs .activeTab { border-bottom-color: var(--accent); color: var(--ink); }
-.actions { display: flex; gap: 4px; align-items: center; margin-left: auto; }
+.actions { display: flex; gap: 4px; align-items: center; justify-self: end; min-width: 0; max-width: 100%; }
+.actionStrip { display: flex; position: relative; align-items: center; gap: 4px; min-width: 0; padding-block: 6px; margin-block: -6px; overflow-x: auto; scrollbar-width: none; }
+.actionStrip > *, .actions > .files { flex-shrink: 0; }
 .history { display: flex; padding-right: 8px; margin-right: 4px; border-right: 1px solid var(--line); }
 .gridButton, .organizeButton { display: flex; align-items: center; gap: 6px; height: 34px; padding: 6px 8px; font-size: 12px; border: 1px solid transparent; background: transparent; color: var(--muted); }
 .organizeButton:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent); }

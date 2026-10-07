@@ -62,16 +62,21 @@ export function App() {
   }
   return <div className={styles.app}>
     <header className={styles.header}>
-      <span className={styles.brand}>infiniboard<span className={styles.brandDot}>.</span></span>
-      <span className={styles.divider} />
-      <input className={styles.projectTitle} aria-label="Project title" value={title} disabled={!ready} maxLength={120} onChange={e => useProject.getState().setTitle(e.target.value)} onBlur={() => { if (!title.trim()) useProject.getState().setTitle('Untitled project') }} onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }} />
+      <div className={styles.projectControls}>
+        <span className={styles.brand}>infiniboard<span className={styles.brandDot}>.</span></span>
+        <span className={styles.divider} />
+        <input className={styles.projectTitle} aria-label="Project title" value={title} disabled={!ready} maxLength={120} onChange={e => useProject.getState().setTitle(e.target.value)} onBlur={() => { if (!title.trim()) useProject.getState().setTitle('Untitled project') }} onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }} />
+      </div>
       <nav className={styles.tabs} aria-label="Project views">
         <button aria-current={tab === 'board' ? 'page' : undefined} className={tab === 'board' ? styles.activeTab : ''} onClick={() => setTab('board')}>Board</button>
         <button aria-current={tab === 'graph' ? 'page' : undefined} className={tab === 'graph' ? styles.activeTab : ''} onClick={() => setTab('graph')}>Graph</button>
       </nav>
       <div className={styles.actions}>
-        {ready && <><ProjectFiles snapshot={snapshot} replace={importProject} /><HistoryControls graph={tab === 'graph'} />{tab === 'graph' && <><OrganizeControl onClick={() => graphApi.current?.organize()} /><GraphContext /></>}<button className={`${styles.gridButton} ${snap ? styles.gridActive : ''}`} aria-label="Grid and snapping (G)" aria-pressed={snap} title="Grid and snapping · G" onClick={() => useProject.getState().toggleSnap()}><Icon name="grid" /><span>Snap</span></button><Shortcuts graph={tab === 'graph'} /></>}
-        <button className={styles.iconButton} disabled={!ready} aria-label={theme === 'dark' ? 'Use paper theme' : 'Use charcoal theme'} title={theme === 'dark' ? 'Paper theme' : 'Charcoal theme'} onClick={() => useProject.getState().setTheme(theme === 'dark' ? 'light' : 'dark')}><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
+        {ready && <ProjectFiles snapshot={snapshot} replace={importProject} />}
+        <div className={styles.actionStrip}>
+          {ready && <><HistoryControls graph={tab === 'graph'} />{tab === 'graph' && <><OrganizeControl onClick={() => graphApi.current?.organize()} /><GraphContext /></>}<button className={`${styles.gridButton} ${snap ? styles.gridActive : ''}`} aria-label="Grid and snapping (G)" aria-pressed={snap} title="Grid and snapping · G" onClick={() => useProject.getState().toggleSnap()}><Icon name="grid" /><span>Snap</span></button><Shortcuts graph={tab === 'graph'} /></>}
+          <button className={styles.iconButton} disabled={!ready} aria-label={theme === 'dark' ? 'Use paper theme' : 'Use charcoal theme'} title={theme === 'dark' ? 'Paper theme' : 'Charcoal theme'} onClick={() => useProject.getState().setTheme(theme === 'dark' ? 'light' : 'dark')}><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
+        </div>
       </div>
     </header>
     <main className={styles.main}>
