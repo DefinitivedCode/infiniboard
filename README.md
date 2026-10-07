@@ -2,7 +2,6 @@
   <img src="docs/readme/wordmark.svg" width="360" alt="Infiniboard wordmark" />
 </p>
 
-<h1 align="center">Infiniboard</h1>
 <p align="center">An infinite whiteboard and mind map for thinking things through.</p>
 <p align="center">
   <img src="https://img.shields.io/badge/React-19-242722?style=flat&amp;labelColor=494e43" alt="React 19" />
@@ -11,8 +10,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-b7472c?style=flat&amp;labelColor=494e43" alt="MIT license" /></a>
 </p>
 <p align="center"><a href="#board">Board</a> · <a href="#graph">Graph</a> · <a href="#local-first-by-design">Privacy</a> · <a href="#getting-started">Getting started</a></p>
-
-![The real Infiniboard Graph in its charcoal theme, showing a fictional indie game plan with three major branches and labeled connections.](docs/readme/hero.webp)
 
 ## What is Infiniboard?
 
