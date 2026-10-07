@@ -139,18 +139,38 @@ JSON is the full portability/backup format. **Graph → Context → Copy** is a 
 
 The deployment target is [infiniboard.masonmau.com](https://infiniboard.masonmau.com); this repository does not assume that a live deployment is available yet.
 
-For **Cloudflare Pages**, connect the audited release repository and use:
+Use **Cloudflare Workers Builds / Static Assets**. Connect the private release repository in **Workers & Pages → Create → Import a repository** and use these build settings:
 
-| Setting | Value |
+| Dashboard setting | Value |
 | --- | --- |
-| Root directory | Repository root |
+| Project / Worker name | `infiniboard` |
+| Git repository | `DefinitivedCode/infiniboard` |
+| Production branch | `main` |
+| Root directory | `/` (repository root; leave the default) |
 | Build command | `npm run build` |
-| Output directory | `dist` |
-| Build environment | `NODE_VERSION=22` |
+| Deploy command | `npx wrangler@4.148.0 deploy` |
+| Build variable | `NODE_VERSION=22` |
+| Optional preview command (non-production branches) | `npx wrangler@4.148.0 preview` |
+| Runtime bindings / variables / secrets | None |
 
-Hosting is static. No Pages Function, Worker, project database, AI proxy or environment secret is required. Leave optional Web Analytics disabled and do not inject tracking scripts. [public/_headers](public/_headers) supplies CSP, referrer, frame and content-type protections; API connections are permitted only to OpenAI. Inline styles support canvas positioning. No client routes require rewrites.
+Workers Builds installs the npm dependencies before building. There is no Pages-style output-directory field to configure: [wrangler.toml](wrangler.toml) explicitly deploys **`./dist`**, the existing Vite output, and enables `single-page-application` fallback for navigation to unmatched paths. The Worker name must match `infiniboard`. Wrangler is pinned in the dashboard commands and fetched by npx; it is not an application dependency.
 
-Attach `infiniboard.masonmau.com` in **Pages → Custom domains** and complete Cloudflare's guided DNS/HTTPS setup manually. Import a JSON export to transfer localhost work to that new origin. See Cloudflare's [build configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/), [headers](https://developers.cloudflare.com/pages/configuration/headers/) and [custom domain](https://developers.cloudflare.com/pages/configuration/custom-domains/) documentation.
+This is an **assets-only deployment**: no Worker entrypoint, application logic, backend, server persistence, asset binding or Cloudflare Vite plugin. Wrangler usage metrics and dependency instrumentation are explicitly disabled. Leave optional Web Analytics disabled and do not inject tracking scripts. Keep all runtime bindings/secrets empty; each user's OpenAI key still belongs only in Assistant Settings.
+
+Vite copies [public/_headers](public/_headers) unchanged to `dist/_headers`. Workers Static Assets parses this file and applies its CSP, referrer, frame, content-type and permissions policies to asset responses, including the SPA fallback. `_headers` itself is not served as a public file. CSP API connections remain limited to OpenAI; inline styles support canvas positioning.
+
+To validate locally without publishing anything, use Node 22 (Wrangler requires Node 22+):
+
+```sh
+npm ci
+npm run build
+npx wrangler@4.148.0 deploy --dry-run
+npx wrangler@4.148.0 dev --local
+```
+
+The dry run validates configuration and prepares the asset manifest without uploading/deploying. The local Workers runtime lets you inspect actual response headers, fingerprinted JS/CSS, the favicon and refresh/navigation fallback. No Cloudflare account login or OpenAI key is required for these checks.
+
+After the dashboard deploys, attach `infiniboard.masonmau.com` under **Worker → Settings → Domains & Routes → Add → Custom Domain**, then complete Cloudflare's DNS/HTTPS setup. This is a separate manual action. Import a JSON export to transfer localhost work to the deployed origin. See the official [Workers Builds settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/), [static asset configuration](https://developers.cloudflare.com/workers/static-assets/), [asset headers](https://developers.cloudflare.com/workers/static-assets/headers/) and [Worker custom domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) documentation.
 
 Before deploying publicly, repeat the [release privacy checklist](RELEASE-AUDIT.md) against the final HTTPS origin, including any scripts injected by the host. Repository publication and deployed-site verification are separate checkpoints.
 

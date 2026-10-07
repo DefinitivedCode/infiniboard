@@ -41,6 +41,12 @@ README relative paths/anchors and four Shields SVG badges are verified. Four rea
 
 ## Hosting / publication
 
-Cloudflare Pages uses repository root, npm run build, dist and NODE_VERSION=22. No Functions, Worker or secret variables are required. public/_headers provides CSP/referrer/frame/content-type protections, permitting API connections only to OpenAI. Leave Web Analytics disabled. Custom-domain DNS/HTTPS setup is manual.
+Cloudflare Workers Builds uses repository root, npm run build, npx wrangler@4.148.0 deploy and NODE_VERSION=22. wrangler.toml deploys ./dist as static assets with SPA navigation fallback. No Worker entrypoint, application logic, backend, server persistence, bindings or runtime secrets are configured. Wrangler metrics/dependency instrumentation are disabled. public/_headers provides CSP/referrer/frame/content-type protections, permitting API connections only to OpenAI. Leave Web Analytics disabled. Custom-domain DNS/HTTPS setup is manual.
 
 Only the new clean history may be pushed to the verified private target. Do not import or merge the original local history later. Inspect the remote commit/tree and confirm private visibility after push. The final task report records the pushed commit and repository-publication decision; making it public remains a separate user action.
+
+## Workers Static Assets follow-up
+
+The release repository now has an explicit assets-only wrangler.toml for infiniboard, compatibility date 2026-10-07, ./dist and single-page-application fallback. No source application files, package dependencies, Worker entrypoint or bindings changed. Wrangler 4.148.0 is invoked through pinned npx commands; CLI metrics and dependency instrumentation are disabled. Generated .wrangler state and local .dev.vars files are ignored; ESLint excludes generated Wrangler code.
+
+npm run build and npx wrangler@4.148.0 deploy --dry-run pass. The dry run prepares the dist assets without uploading/deploying; Wrangler's internal no-op stub is generated outside the repository and is not application code. The local-only Workers runtime parses the existing wildcard header rule. All six public HTML/JS/CSS/favicon assets match dist byte-for-byte, and a nested HTML navigation returns the exact index.html with HTTP 200. All five security headers match public/_headers on every checked response; that file itself is copied unchanged. Typecheck, lint and all 66 tests pass. No direct Cloudflare deploy command, DNS change or repository visibility change was performed by this follow-up. A push to main can trigger Workers Builds if the user has already connected this repository.

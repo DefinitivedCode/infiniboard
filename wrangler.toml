@@ -1,0 +1,10 @@
+name = "infiniboard"
+compatibility_date = "2026-10-07"
+send_metrics = false
+
+[dependencies_instrumentation]
+enabled = false
+
+[assets]
+directory = "./dist"
+not_found_handling = "single-page-application"

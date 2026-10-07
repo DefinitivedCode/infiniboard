@@ -24,3 +24,7 @@ Thumbs.db
 Desktop.ini
 .codex/
 .agents/
+
+.wrangler/
+.dev.vars
+.dev.vars.*
