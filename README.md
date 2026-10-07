@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Vite-6-242722?style=flat&amp;labelColor=494e43" alt="Vite 6" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-b7472c?style=flat&amp;labelColor=494e43" alt="MIT license" /></a>
 </p>
-<p align="center"><a href="#board">Board</a> · <a href="#graph">Graph</a> · <a href="#local-first-by-design">Privacy</a> · <a href="#getting-started">Getting started</a></p>
+<p align="center"><a href="https://infiniboard.masonmau.com">Open app</a> · <a href="#board">Board</a> · <a href="#graph">Graph</a> · <a href="#local-first-by-design">Privacy</a> · <a href="#getting-started">Getting started</a></p>
 
 ## What is Infiniboard?
 
@@ -75,7 +75,7 @@ npm ci
 npm run dev
 ```
 
-Open the URL Vite prints, normally `http://127.0.0.1:5173`. No backend, account, credential or environment variable is required. The repository must be accessible to your GitHub account while it remains private.
+Open the URL Vite prints, normally `http://127.0.0.1:5173`. No backend, account, credential or environment variable is required.
 
 Never put a private API key into a `VITE_*` build variable: those values become public browser data. User keys belong in Assistant Settings only. [.env.example](.env.example) documents the intentionally empty setup.
 
@@ -92,7 +92,7 @@ Never put a private API key into a `VITE_*` build variable: those values become 
 
 Tests mock AI requests and make no paid API calls. Development-only [browser fixtures](tests/browser/README.md) exercise 500 nodes / 700 edges, attachment geometry, assistant flows and real local persistence. They are excluded from the production build. Test output is ignored under `.verification/`.
 
-Follow [DESIGN.md](DESIGN.md) for visual rules and [AGENTS.md](AGENTS.md) for implementation conventions. No component library or external font service is needed.
+Follow [the design guide](docs/DESIGN.md) for visual rules and [AGENTS.md](AGENTS.md) for implementation conventions. No component library or external font service is needed.
 
 ### Shortcuts
 
@@ -139,14 +139,17 @@ JSON is the full portability/backup format. **Graph → Context → Copy** is a 
 
 The official Infiniboard instance is available at **[infiniboard.masonmau.com](https://infiniboard.masonmau.com)**.
 
-Infiniboard is deployed as a static application using Cloudflare Workers Static Assets.
-There is no application backend or server-side project storage.
+Infiniboard is deployed as a static application using Cloudflare Workers Static Assets. There is no application backend or server-side project storage.
 
 The production build is generated with:
 
-```bash
+```sh
 npm run build
 ```
+
+[wrangler.toml](wrangler.toml) deploys the resulting `./dist` assets with SPA navigation fallback, without a Worker entrypoint or runtime bindings. [public/_headers](public/_headers) supplies the security headers; retain these when hosting elsewhere. User OpenAI keys belong in Assistant Settings, never in hosting credentials or build variables. See Cloudflare's [Static Assets](https://developers.cloudflare.com/workers/static-assets/) and [header configuration](https://developers.cloudflare.com/workers/static-assets/headers/) documentation.
+
+Each origin has independent local browser storage. Use a JSON export/import to transfer a project between localhost and a deployed instance.
 
 ## Tech stack
 

@@ -1,13 +1,13 @@
 # README assets
 
-All screenshots are actual captures of the application at 1440×900. Content was written from scratch for public documentation in tests/fixtures/showcase.ts, rendered through the real app via the development-only showcase entry, and organized using the visible Organize control. No OpenAI request was made.
+These are real application captures at 1440×900, showing fictional game-planning content from [the showcase fixture](../../tests/fixtures/showcase.ts). No AI request is needed to reproduce them.
 
-- board.webp: fictional Weekend game jam notes, scope checklist, shapes, arrow and pen underline.
-- graph.webp: fictional Build an indie game hierarchy in the paper theme (7 nodes, 6 edges, one label).
-- hero.webp: the same graph in the app's designed charcoal theme.
-- context.webp: the entirely local Context dialog for that graph.
-- wordmark.svg: the existing app's lowercase Georgia wordmark and restrained accent dot; no new logo.
+- [Board](board.webp): weekend game jam notes, scope checklist, shapes, arrow and freehand underline.
+- [Graph](graph.webp): an indie game hierarchy with seven nodes, six edges and a labeled connection.
+- [Charcoal theme](hero.webp): the same graph in the dark theme.
+- [Graph Context](context.webp): the local plain-text dialog.
+- [Wordmark](wordmark.svg): the application's serif lettering and accent dot.
 
-Images are losslessly encoded WebP from browser captures, without EXIF, location, comments or embedded filesystem metadata. There are no private screenshots, real conversations, user projects or credentials. Assets are documentation-only and do not enter the production build. Original screenshot exports and browser/test data are excluded from Git. No separate social-preview image was created.
+For reproduction, follow the [browser fixture instructions](../../tests/browser/README.md). Use a fresh disposable origin/profile, choose Graph → Organize, and clear selection before capture. Keep personal projects and credentials out of documentation screenshots.
 
-To reproduce, use the fresh-origin showcase instructions in tests/browser/README.md. Preserve the real application chrome and clear selection before capture. Do not reuse existing browser projects or historical screenshots.
+WebP screenshots contain no embedded EXIF or location data. These assets are documentation-only and are excluded from the production build.

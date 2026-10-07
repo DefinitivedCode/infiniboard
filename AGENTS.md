@@ -1,37 +1,30 @@
-# Infiniboard conventions
+# Infiniboard development conventions
 
-## Product and scope
-- Personal, single-user brainstorming tool. No accounts, collaboration, or backend. Optional Graph AI calls OpenAI directly with the user's key.
-- Two project views: Board (custom whiteboard) and Graph (@xyflow/react with custom nodes and edges).
-- Completed features include Graph AI preview/restore/apply, local AI settings, strict validation, compact layout and explicit Organize.
-- Release scope: local Graph Context, BYOK privacy safeguards, repository audit, documentation and static deployment preparation. Commit in logical chunks. Stop after the requested scope; do not redesign unrelated UI or change Board behavior.
-- AI is BYOK, direct to OpenAI, with no shared application key or proxy. Keys default to tab memory; only explicit "Remember on this device" consent permits separate IndexedDB storage. Clear key removes both copies. Credentials never enter projects, JSON, Context, logs, errors, URLs, analytics, examples, or test fixtures. Automated API tests use mocked fetch only.
-- Project autosave is browser-local only. No accounts, project database on the server, cloud sync, or content telemetry. Graph Context generation/copying is entirely local. Browser credentials are accessible to page code; do not claim perfect security.
-- Audit tracked files AND history before publication. Do not push private test data or credentials in historical commits, and do not change repository visibility or DNS without explicit authorization.
-- No placeholder controls or inactive feature buttons.
-- Board and Graph share settings and a project, but have independent content, viewports, selections, and undo histories.
+## Architecture and privacy
+- A personal, local-first application: no accounts, collaboration, project backend, cloud sync or content telemetry.
+- Board and Graph are independent canvases in one project, with separate content, viewports, selections and undo histories. Shared settings control theme and the 24-unit snap grid.
+- Autosave writes only to browser IndexedDB through Dexie. JSON export/import is the portability and backup mechanism; Graph Context generation and copying are local.
+- Optional Graph AI calls OpenAI directly with the user's key. Never add a shared key, proxy, build-time credential or credential logging.
+- Keys default to tab memory. Only explicit Remember on this device consent permits storage in the separate assistant database. Clear key removes both copies. Credentials must never enter projects, exports, Context, URLs, errors or fixtures.
+- Browser-side credentials are accessible to page code. Preserve honest security disclosures and provider-retention caveats.
 
-## Stack and implementation
-- Vite, React, strict TypeScript. Zustand state. Dexie IndexedDB with debounced autosave.
-- Plain CSS variables and CSS modules. No Tailwind or component libraries.
-- Board uses a CSS-transformed world layer, with viewport transformations applied directly to the DOM. Pan/zoom must not rerender the item tree.
-- Keep item updates granular and support 1,000+ items. Prefer readable code over abstractions.
-- Shared optional visible grid and snapping. Keyboard shortcuts, undo/redo, project JSON import/export.
-- Board: text, sticky notes, rect, ellipse, line/arrow, pen; selection, multi-selection, move, resize, delete.
-- Graph: title/body nodes, explicit resizable importance and presets, draggable connections, labeled edges.
+## Implementation
+- Vite, React and strict TypeScript; Zustand state; Dexie with debounced autosave. Plain CSS variables and CSS modules, without component libraries or external font services.
+- Board uses a custom CSS-transformed world layer. Apply viewport transforms directly to the DOM so pan/zoom does not rerender the item tree.
+- Graph uses @xyflow/react with memoized custom nodes/edges and stable adapter identities. Keep updates granular for large canvases.
+- Manual node dimensions and positions remain authoritative. Content fitting is an explicit creation/preset action; organization runs only when intentionally requested.
+- Validate AI proposals before writing graph state. Preview changes nothing until Apply, which is one undo step. Preserve original omitted text for restoration.
+- Keep code readable, dependencies minimal, and controls functional. Avoid unrelated refactoring when making focused fixes.
 
-## Design
-- Read and follow DESIGN.md before adding UI.
-- Flat editorial chrome, warm paper, near-black ink, one restrained accent, hairline borders, tight spacing.
-- Designed dark theme. Distinctive headings paired with clean sans/mono UI. One consistent custom SVG line icon set.
-- No gradients, blur, glow, purple/violet accents, emoji icons, large rounded cards, soft shadows, hero empty states, or welcome copy.
-- Accessible labeled controls, visible focus, usable pointer and keyboard input.
+## Design and accessibility
+- Follow [docs/DESIGN.md](docs/DESIGN.md): flat editorial chrome, warm paper and designed charcoal themes, hairline borders, tight spacing and one restrained accent.
+- Use the existing line icons, labeled controls and visible keyboard focus. No gradients, blur, glow, emoji icons or decorative shadows.
+- Canvas shortcuts yield to text editing, composition and dialogs. Preserve native scrolling inside long node text.
+- Retain React Flow's visible attribution and the MIT license notice.
 
-## Milestones and verification
-- M1: scaffold, two-tab shell, DESIGN.md, theme tokens.
-- M2: complete Board interactions, grid/snap, history, persistence.
-- M3 (requires user authorization): Graph implementation.
-- M4: JSON import/export, shortcuts, polish.
-- M5: optional Graph AI assistant. Zod validates every proposal before Graph writes; Apply is one history entry.
-- Run npm run typecheck, npm run lint, npm run build for each milestone; fix failures before committing/reporting.
-- Commit each milestone. Keep dependencies minimal and report additions.
+## Verification
+- Install locked dependencies with `npm ci`.
+- Before submitting changes, run `npm run typecheck`, `npm run lint`, `npm test` and `npm run build`; fix failures.
+- AI tests use mocked requests and runtime-generated disposable credentials only. Never enter a real key in a browser fixture.
+- See [tests/browser/README.md](tests/browser/README.md) for geometry, performance and privacy fixtures. Use a disposable origin/profile for persistence checks and screenshots.
+- Keep generated output, local environment files, browser data and temporary artifacts out of Git. Test output lives in ignored `.verification/`; production output lives in ignored `dist/`.
