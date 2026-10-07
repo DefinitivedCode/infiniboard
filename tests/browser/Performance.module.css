@@ -1,0 +1,6 @@
+.metrics { position: fixed; right: 16px; bottom: 16px; width: 340px; padding: 12px; border: 1px solid var(--line); background: var(--surface); z-index: 50; font-size: 12px; }
+.metrics h1 { font: 20px var(--serif); margin: 0; }
+.metrics p { color: var(--muted); font-size: 11px; margin: 8px 0; }
+.metrics output, .metrics small { display: block; font: 11px var(--mono); margin: 8px 0; }
+.metrics > div { display: flex; flex-wrap: wrap; gap: 4px; }
+.metrics button { border: 1px solid var(--line); background: transparent; padding: 6px 8px; font-size: 11px; }

@@ -1,0 +1,35 @@
+.stage { position: absolute; inset: 0; overflow: hidden; touch-action: none; outline: none !important; user-select: none; --inverse-zoom: 1; }
+.stage[data-tool='hand'], .stage[data-space='true'] { cursor: grab; }
+.stage[data-dragging='true'] { cursor: grabbing; }
+.stage[data-tool='text'] { cursor: text; }
+.stage[data-tool='sticky'], .stage[data-tool='rect'], .stage[data-tool='ellipse'], .stage[data-tool='line'], .stage[data-tool='arrow'], .stage[data-tool='pen'] { cursor: crosshair; }
+.grid { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.world { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
+.empty { position: absolute; top: 32px; left: 92px; color: var(--muted); pointer-events: none; }
+.empty span { font: 11px var(--mono); letter-spacing: .6px; }
+.empty p { font: 22px var(--serif); color: var(--ink); margin: 12px 0; }
+.empty small { font-size: 12px; line-height: 1.8; }
+.item { position: absolute; left: 0; top: 0; color: var(--ink); overflow: visible; }
+.sticky { border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); padding: 16px; }
+.text { padding: 4px; }
+.itemText { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.45; height: 100%; overflow: hidden; }
+.text:empty { min-width: 80px; min-height: 40px; }
+.shape { width: 100%; height: 100%; border: 2px solid var(--ink); }
+.ellipse { border-radius: 50%; }
+.ellipse .shape { border-radius: 50%; }
+.strokeItem { pointer-events: none; }
+.drawing { overflow: visible; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; display: block; }
+.drawing path { pointer-events: stroke; }
+.drawing .hitStroke { stroke: transparent; stroke-width: calc(14px * var(--inverse-zoom)); }
+.item[data-multi='true']:not(.strokeItem) { outline: calc(1px * var(--inverse-zoom)) solid var(--accent); outline-offset: calc(2px * var(--inverse-zoom)); }
+.textEditor { color: inherit; background: transparent; padding: 0; border: 0; border-radius: 0; width: 100%; height: 100%; resize: none; outline: none !important; line-height: 1.45; display: block; overflow: hidden; overflow-wrap: anywhere; user-select: text; }
+.selection { position: absolute; top: 0; left: 0; border: calc(1px * var(--inverse-zoom)) solid var(--accent); pointer-events: none; }
+.handle { position: absolute; width: calc(8px * var(--inverse-zoom)); height: calc(8px * var(--inverse-zoom)); background: var(--surface); border: calc(1px * var(--inverse-zoom)) solid var(--accent); pointer-events: auto; transform: translate(-50%, -50%); }
+.nw { top: 0; left: 0; cursor: nwse-resize; }
+.ne { top: 0; left: 100%; cursor: nesw-resize; }
+.se { top: 100%; left: 100%; cursor: nwse-resize; }
+.sw { top: 100%; left: 0; cursor: nesw-resize; }
+.marquee { position: absolute; border: calc(1px * var(--inverse-zoom)) solid var(--accent); background: color-mix(in srgb, var(--accent) 9%, transparent); pointer-events: none; }
+.draft { pointer-events: none; opacity: .7; }
+.draft .drawing path { pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .world { will-change: auto; } }

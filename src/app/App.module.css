@@ -1,0 +1,55 @@
+.app { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+.header { min-height: 52px; display: flex; align-items: center; gap: 16px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--surface); z-index: 20; }
+.brand { font-family: var(--serif); font-size: 22px; letter-spacing: -.8px; white-space: nowrap; }
+.brandDot { color: var(--accent); }
+.divider { height: 20px; border-left: 1px solid var(--line); }
+.projectTitle { width: 220px; min-width: 60px; border: 0; border-bottom: 1px solid transparent; border-radius: 0; padding: 5px 0; color: var(--ink); background: transparent; font-size: 13px; }
+.projectTitle:hover { border-bottom-color: var(--line); }
+.tabs { display: flex; align-self: stretch; margin-left: auto; gap: 4px; }
+.tabs button { padding: 0 20px; border: 0; border-radius: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-size: 13px; }
+.tabs button:hover { color: var(--ink); }
+.tabs .activeTab { border-bottom-color: var(--accent); color: var(--ink); }
+.actions { display: flex; gap: 4px; align-items: center; margin-left: auto; }
+.history { display: flex; padding-right: 8px; margin-right: 4px; border-right: 1px solid var(--line); }
+.gridButton, .organizeButton { display: flex; align-items: center; gap: 6px; height: 34px; padding: 6px 8px; font-size: 12px; border: 1px solid transparent; background: transparent; color: var(--muted); }
+.organizeButton:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent); }
+.gridButton:hover, .gridActive { background: var(--accent-soft); color: var(--accent); }
+.iconButton { display: inline-flex; width: 34px; height: 34px; padding: 7px; align-items: center; justify-content: center; border: 1px solid transparent; background: transparent; }
+.iconButton:hover:not(:disabled) { background: var(--accent-soft); }
+.main { flex: 1; min-height: 0; position: relative; }
+.loading { padding: 32px; font-size: 13px; color: var(--muted); }
+.footer { min-height: 30px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-top: 1px solid var(--line); background: var(--surface); font-size: 11px; color: var(--muted); }
+.shortcuts { color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; box-shadow: none; padding: 24px; width: 640px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 48px); }
+.shortcuts[open] { display: flex; flex-direction: column; gap: 16px; }
+.shortcuts::backdrop { background: var(--paper); }
+.dialogHeading { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.dialogHeading h2 { font: 22px var(--serif); margin: 0; }
+.files { position: relative; display: flex; }
+.fileMenu { position: absolute; right: 0; top: 42px; min-width: 176px; padding: 4px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+.fileMenu button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 8px; border: 0; background: transparent; text-align: left; font-size: 13px; }
+.fileMenu button:hover { background: var(--accent-soft); }
+.fileDialog { color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; box-shadow: none; padding: 24px; width: 480px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 48px); }
+.fileDialog::backdrop { background: var(--paper); }
+.fileDialog p { font-size: 13px; line-height: 1.6; margin: 16px 0; overflow-wrap: anywhere; }
+.fileDialog .filename { font: 12px var(--mono); color: var(--muted); }
+.dialogActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding-top: 16px; border-top: 1px solid var(--line); }
+.dialogActions button { min-height: 36px; padding: 8px 12px; border: 1px solid var(--line); background: transparent; font-size: 12px; }
+.dialogActions button:hover { border-color: var(--accent); }
+.dialogActions .confirmButton { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.shortcutRows { min-height: 0; overflow: auto; }
+.contextDialog { color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 24px; width: 760px; max-width: calc(100vw - 32px); max-height: calc(100dvh - 48px); box-shadow: none; }
+.contextDialog[open] { display: flex; flex-direction: column; gap: 16px; }
+.contextDialog::backdrop { background: var(--paper); }
+.contextDialog p { margin: 0; color: var(--muted); font-size: 12px; }
+.contextText { width: 100%; height: 50dvh; min-height: 120px; resize: none; overflow: auto; border: 1px solid var(--line); border-radius: 0; background: var(--paper); color: var(--ink); padding: 12px; font: 12px/1.6 var(--mono); }
+.contextDialog .dialogActions { align-items: center; }
+.contextDialog .dialogActions span { margin-right: auto; font-size: 12px; }
+.contextDialog .dialogActions button { display: flex; align-items: center; gap: 8px; }
+.shortcutRows h3 { font-size: 13px; margin: 16px 0 8px; }
+.shortcutRows h3:first-child { margin-top: 0; }
+.shortcutRows > div { display: flex; justify-content: space-between; gap: 16px; padding: 4px 0; font-size: 12px; }
+.shortcutRows kbd { font: 11px var(--mono); color: var(--muted); white-space: nowrap; }
+.shortcuts p { margin: 0; font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; line-height: 1.5; }
+@media (max-width: 720px) { .header { gap: 8px; padding: 0 12px; } .brand { font-size: 19px; } .projectTitle { width: 120px; } .tabs button { padding: 0 12px; } .divider { display: none; } }
+@media (max-width: 920px) { .projectTitle { width: 140px; } .header { gap: 10px; } .tabs button { padding: 0 12px; } .gridButton span { display: none; } }
+@media (max-width: 640px) { .brand { display: none; } .projectTitle { width: 100px; } .header { gap: 4px; } .history { padding-right: 2px; margin-right: 0; } .footer { padding: 0 8px; } .shortcutRows > div { flex-wrap: wrap; gap: 4px; } }

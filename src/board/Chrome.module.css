@@ -1,0 +1,41 @@
+.toolbar { position: absolute; top: 20px; left: 16px; padding: 5px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); z-index: 5; display: flex; flex-direction: column; gap: 3px; }
+.tool { display: flex; align-items: center; justify-content: center; position: relative; width: 38px; height: 38px; padding: 8px; border: 1px solid transparent; background: transparent; color: var(--muted); }
+.tool:hover { color: var(--ink); background: var(--paper); }
+.tool.active { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 20%, transparent); }
+.toolKey { position: absolute; right: 2px; bottom: 1px; font: 8px var(--mono); opacity: .8; }
+.sectionStart { margin-top: 8px; }
+.toolbar::after { content: ''; position: absolute; top: 93px; left: 8px; right: 8px; border-top: 1px solid var(--line); }
+.inspector { position: absolute; top: 20px; right: 20px; width: 212px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 12px; z-index: 5; font-size: 12px; }
+.inspectorHeading { display: flex; align-items: center; justify-content: space-between; font-size: 13px; border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 12px; }
+.inspectorActions { display: flex; gap: 2px; }
+.inspectorActions button { width: 30px; height: 30px; background: transparent; border: 0; display: grid; place-items: center; }
+.inspectorActions button:hover { background: var(--accent-soft); }
+.dimensions { display: flex; gap: 8px; }
+.dimension { width: 50%; display: flex; align-items: center; border: 1px solid var(--line); border-radius: 3px; padding-left: 8px; color: var(--muted); font: 11px var(--mono); }
+.dimension input { width: 100%; min-width: 0; border: 0; color: var(--ink); background: transparent; padding: 8px; font: 12px var(--mono); -moz-appearance: textfield; }
+.dimension input::-webkit-inner-spin-button { appearance: none; }
+.measure { font: 12px var(--mono); }
+.measure span { font: 11px 'Segoe UI', sans-serif; color: var(--muted); }
+.swatches { display: flex; gap: 8px; margin-top: 12px; }
+.swatches button { width: 28px; height: 28px; padding: 3px; border: 1px solid var(--line); }
+.swatches button[aria-pressed='true'] { outline: 1px solid var(--accent); outline-offset: 2px; }
+.textControls { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 8px; }
+.textControls label { color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.textControls select { border: 1px solid var(--line); border-radius: 3px; color: var(--ink); padding: 5px; background: var(--surface); font: inherit; }
+.textControls button { font-size: 11px; border: 1px solid var(--line); background: transparent; padding: 7px; }
+.inspectorHint { font-size: 11px; line-height: 1.5; color: var(--muted); margin: 12px 0 0; }
+.statusBar { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 12px; }
+.guidance { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.statusRight { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.save { display: flex; align-items: center; gap: 5px; }
+.saveDot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+.save[data-status='saved'] .saveDot { background: var(--accent); }
+.save[data-status='error'] { color: var(--accent); }
+.retry { border: 0; background: transparent; color: var(--accent); padding: 0; font-size: 11px; text-decoration: underline; }
+.zoom { display: flex; align-items: center; gap: 2px; }
+.zoom button { border: 0; background: transparent; width: 26px; height: 26px; display: grid; place-items: center; padding: 4px; }
+.zoom button:hover { background: var(--accent-soft); }
+.zoom .percentage { width: 45px; font: 11px var(--mono); }
+.zoom .fit { margin-left: 4px; border-left: 1px solid var(--line); border-radius: 0; padding-left: 8px; width: 32px; }
+@media (max-width: 780px) { .inspector { right: 12px; width: 186px; } .statusRight { gap: 8px; } .guidance { max-width: 35vw; } }
+@media (max-height: 600px) { .toolbar { gap: 1px; top: 12px; } .tool { height: 32px; width: 32px; } .toolbar::after { top: 79px; } }

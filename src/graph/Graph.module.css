@@ -1,0 +1,60 @@
+.stage { position: absolute; inset: 0; background: var(--paper); outline: none !important; --inverse-zoom: 1; }
+.stage :global(.react-flow) { --xy-background-color: var(--paper); --xy-node-color: var(--ink); --xy-edge-stroke: var(--ink); --xy-edge-stroke-selected: var(--accent); --xy-selection-background-color: color-mix(in srgb, var(--accent) 9%, transparent); --xy-selection-border: 1px solid var(--accent); --xy-resize-background-color: var(--accent); --xy-handle-background-color: var(--surface); }
+.stage :global(.react-flow__node-idea) { padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.stage :global(.react-flow__node-idea.selected) .node { border-color: var(--accent); }
+.stage :global(.react-flow__node:focus-visible) { outline: 2px solid var(--accent); }
+.stage :global(.react-flow__selection), .stage :global(.react-flow__nodesselection-rect) { border: calc(1px * var(--inverse-zoom)) solid var(--accent); border-radius: 0; background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.stage :global(.react-flow__edgeupdater) { fill: transparent; stroke: none; }
+.endpoint { fill: var(--surface); stroke: var(--accent); stroke-width: 1px; pointer-events: none; }
+.stage :global(.react-flow__edge:focus-visible) { outline: none; }
+.stage :global(.react-flow__edge:focus-visible) .edge { stroke: var(--accent); }
+.stage :global(.react-flow__attribution) { font: 10px 'Segoe UI', Arial, sans-serif; padding: 2px 6px; background: var(--paper); }
+.stage :global(.react-flow__attribution a) { color: var(--muted); }
+.grid { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+.node { position: relative; width: 100%; height: 100%; border: 1px solid var(--ink); background: var(--surface); color: var(--ink); border-radius: 0; padding: var(--node-padding); }
+.nodeContent { height: 100%; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.nodeTitle { font: var(--title-size)/1.2 var(--serif); letter-spacing: -.4px; white-space: pre-wrap; overflow-wrap: anywhere; flex-shrink: 0; max-height: 100%; overflow: auto; }
+.withBody .nodeTitle { max-height: 60%; }
+.nodeBody { font-size: var(--body-size); line-height: 1.45; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; min-height: 0; overflow: auto; }
+.node .handle { width: calc(8px * var(--inverse-zoom)); height: calc(8px * var(--inverse-zoom)); min-width: 0; min-height: 0; border: calc(1px * var(--inverse-zoom)) solid var(--ink); border-radius: 0; background: var(--surface); }
+.node .handle:hover, .node :global(.react-flow__handle.connectingfrom), .node :global(.react-flow__handle.valid) { background: var(--accent-soft); border-color: var(--accent); }
+.node .resizeHandle { background: var(--surface) !important; border: 1px solid var(--accent); border-radius: 0; width: 8px; height: 8px; }
+.node .resizeLine { border-color: var(--accent) !important; }
+.node :global(.react-flow__resize-control.handle:not(.top.left):not(.top.right):not(.bottom.left):not(.bottom.right)) { display: none; }
+.nodeEditor { height: 100%; display: flex; flex-direction: column; gap: 8px; cursor: text; }
+.titleInput { width: 100%; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--ink); font: var(--title-size)/1.2 var(--serif); padding: 0 0 4px; min-width: 0; }
+.bodyInput { flex: 1; min-height: 0; width: 100%; border: 0; padding: 0; resize: none; background: transparent; color: var(--ink); font: var(--body-size)/1.45 'Segoe UI', Arial, sans-serif; }
+.editHint { font: 10px var(--mono); color: var(--muted); }
+.edge { fill: none; stroke: var(--ink) !important; stroke-width: 1.7; }
+.selectedEdge { stroke: var(--accent) !important; }
+.edgeLabel { position: absolute; pointer-events: all; }
+.edgeLabel button, .labelInput { padding: 4px 8px; color: var(--ink); font: 12px 'Segoe UI', Arial, sans-serif; background: var(--surface); border: 1px solid var(--line); border-radius: 3px; max-width: 280px; }
+.edgeLabel button:hover { border-color: var(--accent); }
+.labelInput { width: 180px; border-color: var(--accent); }
+.connectionPreview { fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-dasharray: 5 4; }
+.connectionPreview[data-invalid='true'] { stroke: var(--muted); }
+.toolbar { position: absolute; top: 20px; left: 16px; z-index: 10; display: flex; flex-direction: column; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; }
+.toolbar button { width: 36px; height: 36px; padding: 8px; display: grid; place-items: center; border: 1px solid transparent; background: transparent; color: var(--muted); }
+.toolbar button:hover { color: var(--ink); background: var(--paper); }
+.toolbar button[aria-pressed='true'] { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 20%, transparent); }
+.toolbar .addButton { margin-top: 8px; border-top: 1px solid var(--line); border-radius: 0; }
+.inspector { position: absolute; right: 20px; top: 20px; z-index: 10; width: 212px; padding: 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-size: 12px; }
+.inspectorHeading { display: flex; align-items: center; justify-content: space-between; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.inspectorHeading > div { display: flex; }
+.inspectorHeading button { display: grid; place-items: center; width: 30px; height: 30px; padding: 4px; background: transparent; border: 0; }
+.inspectorHeading button:hover { background: var(--accent-soft); }
+.propertyLabel { font-size: 11px; color: var(--muted); }
+.presets { display: flex; gap: 4px; margin: 8px 0; }
+.presets button { width: 25%; height: 32px; border: 1px solid var(--line); background: transparent; font: 12px var(--mono); }
+.presets button[aria-pressed='true'] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.measure { font: 12px var(--mono); margin: 8px 0 12px; }
+.measure span { color: var(--muted); font: 11px 'Segoe UI', sans-serif; }
+.editButton { width: 100%; height: 32px; border: 1px solid var(--line); background: transparent; font-size: 12px; }
+.editButton:hover { border-color: var(--accent); }
+.inspectorHint { font-size: 11px; line-height: 1.5; margin: 12px 0 0; color: var(--muted); }
+.empty { position: absolute; left: 92px; top: 32px; pointer-events: none; color: var(--muted); }
+.empty span { font: 11px var(--mono); letter-spacing: .6px; }
+.empty p { font: 22px var(--serif); margin: 12px 0; color: var(--ink); }
+.empty small { font-size: 12px; line-height: 1.8; }
+@media (max-width: 780px) { .inspector { width: 186px; right: 12px; } }
+@media (max-height: 600px) { .toolbar { top: 12px; gap: 1px; } .toolbar button { width: 32px; height: 32px; } }
