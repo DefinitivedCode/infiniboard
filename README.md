@@ -46,13 +46,19 @@ Arrange nodes by hand for as long as you like. **Organize** explicitly lays out 
 
 ## Graph AI
 
-The assistant is optional. Paste notes to **build a new map**, or select a node and **expand** it. The prompt favors semantic hierarchy over source headings or visual balance. Spelling cleanup and repeated/off-topic filtering are optional; omitted passages remain available to restore. Review the outline before **Apply**, which groups the change into one undo operation, or **Discard** it.
+The assistant is optional. **New tree** creates a standalone tree beside existing content without sending graph context. **Place in map** adds points into existing branches; **Under selected** attaches beneath one node. Collapsed **Options** set depth, branching, body detail, grouping, a hard node limit (60 by default), cross-links and new branches. Spelling cleanup and repeated/off-topic filtering remain optional.
+
+Review the in-panel outline, uncheck whole subtrees, search/reassign placement parents, and restore omissions. **Apply** adds only checked nodes as one undo operation without moving existing nodes. **Regenerate** reuses the preview's submitted inputs and context; **Run tweak** appends an instruction and replaces the preview after success. Failed or cancelled reruns keep the previous preview.
+
+Built-in presets have editable local copies. Presets and the last 10 successful generations live in a separate local IndexedDB library, excluded from project exports. History keeps submitted notes, instructions and controls plus timestamp, node count and cost; it contains neither API settings nor graph snapshots. Loading an entry restores inputs and controls without editing the canvas.
 
 **The OpenAI API key is provided by the user.** Infiniboard supplies no key, free AI usage or shared proxy. In Graph, open **Assistant → Settings** to enter your key and choose model/effort preferences. No key is needed for Board, ordinary Graph editing, Organize or Context.
 
 Keys default to tab memory and disappear on reload/close. **Remember on this device** is an explicit choice that saves the key in separate IndexedDB storage for that browser profile and origin. **Clear key** removes both the stored and current-tab copies. Credentials saved by older versions without consent are cleared on upgrade.
 
-Only **Generate** sends notes, instructions and options directly to the OpenAI Responses API. Expansion also sends the selected node's title/body; the rest of the graph and Board are excluded. Requests use an Authorization header, omit cookies/referrers, reject redirects and set `store: false`. Cancellation may still incur usage; cost estimates are approximate and OpenAI billing/data policies apply. `store: false` does not promise zero provider retention.
+**Generate**, **Regenerate** and **Run tweak** send notes, instructions and explicit output rules directly to the OpenAI Responses API. New tree sends no existing graph. Place in map sends the whole map or **Selected branch** scope; Under selected sends the selected subtree but attaches only at its root. Context contains IDs, inferred parents, depth, titles and bodies truncated to 160 characters. Above roughly 60,000 estimated context tokens, only IDs, parents and titles are sent. Board content is excluded.
+
+Requests use an Authorization header, omit cookies/referrers, reject redirects and set `store: false`. Cancellation may still incur usage. Before generation, token estimates use characters/4 plus an approximate output allowance and known model rates; unknown model IDs show no cost. Max nodes violations reject the proposal with a visible message; restores also respect that limit. Provider billing and data policies apply. `store: false` does not promise zero provider retention. AI placement/confidence and hierarchy need review; context uses the first incoming edge as the primary parent when a graph has multiple parents or cycles.
 
 ## Local-first by design
 
@@ -62,7 +68,7 @@ Editing, autosave, Organize and Context do not upload project contents. Browser 
 
 Use JSON exports for portable backups. Clearing site data can erase your work, and session undo history is not saved. A project on localhost does not automatically appear on another browser or the deployed site.
 
-The user's key goes directly to OpenAI when Generate is invoked, never to Infiniboard hosting. Keys are excluded from project files, Context, URLs, logs and application error messages. **Browser-side credentials are accessible to code executing in the page context.** Memory and IndexedDB are not perfectly secure: trust the code/origin you use, limit and monitor your key, and revoke it if compromised.
+The user's key goes directly to OpenAI when Generate, Regenerate or Run tweak is invoked, never to Infiniboard hosting. Keys are excluded from project files, Context, URLs, logs and application error messages. **Browser-side credentials are accessible to code executing in the page context.** Memory and IndexedDB are not perfectly secure: trust the code/origin you use, limit and monitor your key, and revoke it if compromised.
 
 ## Getting started
 

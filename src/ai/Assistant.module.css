@@ -9,11 +9,44 @@
 .panel button:hover, .dialog button:hover { border-color: var(--accent); }
 .panel button:disabled, .dialog button:disabled { opacity: .5; cursor: default; }
 .panel button.primary, .dialog button.primary { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
-.content { padding: 16px; overflow: auto; min-height: 0; flex: 1; }
+.content { position: relative; padding: 12px 16px; overflow: auto; min-height: 0; flex: 1; }
+.inputs { border: 0; padding: 0; margin: 0; min-width: 0; }
+.segmented { display: flex; margin-bottom: 8px; }
+.panel .segmented button { flex: 1; border-radius: 0; padding: 8px 4px; font-size: 12px; }
+.panel .segmented button + button { border-left: 0; }
+.panel .segmented button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-bottom-color: var(--accent); }
+.scope { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; font: 11px/1.4 var(--mono); color: var(--muted); }
+.scope > span { overflow-wrap: anywhere; }
+.scope > span:last-child { flex-shrink: 0; }
+.scope label { display: flex; align-items: center; gap: 8px; }
+.scope select { min-height: 32px; padding: 4px; max-width: 144px; background: var(--paper); color: var(--ink); border: 1px solid var(--line); font-size: 12px; }
+.options { margin: 8px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.dials { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; padding-top: 4px; }
+.dials .field { min-width: 0; }
+.generateRow, .buttonRow, .tweak { display: flex; align-items: center; gap: 8px; }
+.generateRow { justify-content: space-between; margin-top: 12px; }
+.generateRow button { flex-shrink: 0; }
+.estimate { margin: 0; color: var(--muted); font: 11px/1.5 var(--mono); }
+.buttonRow { flex-wrap: wrap; }
+.tweak { margin: 8px 0 16px; align-items: flex-end; }
+.tweak .field { flex: 1; margin: 0; }
+.tweak button { margin-bottom: 0; flex-shrink: 0; min-height: 36px; }
+.presetRow > .field { margin-bottom: 4px; }
+.presetRow > details { margin-bottom: 8px; }
+.presetManager { border-left: 1px solid var(--line); padding: 8px 0 8px 12px; }
+.preview { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.placement .field { margin: 8px 0; }
+.placeDetails { margin: 4px 0; }
+.history { margin-top: 16px; border-top: 1px solid var(--line); }
+.history button { display: block; width: 100%; text-align: left; margin-top: 8px; overflow-wrap: anywhere; }
+.outline .nodeHeading { align-items: center; }
+.nodeHeading .check { min-width: 0; margin: 0; align-items: flex-start; }
+.nodeHeading input { flex-shrink: 0; }
+.outline p.metadata, .metadata { color: var(--muted); font: 11px/1.5 var(--mono); overflow-wrap: anywhere; }
 .mode { margin: 0 0 16px; font: 13px var(--mono); overflow-wrap: anywhere; }
-.field { display: block; font-size: 12px; margin: 0 0 16px; }
+.field { display: block; font-size: 12px; margin: 0 0 12px; }
 .field input, .field textarea, .field select { display: block; width: 100%; margin-top: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 0; background: var(--paper); color: var(--ink); font: 13px/1.45 'Segoe UI', Arial, sans-serif; }
-.field textarea { height: 196px; min-height: 96px; max-height: 400px; resize: vertical; }
+.field textarea { height: clamp(120px, 22vh, 260px); min-height: 96px; max-height: 400px; resize: vertical; }
 .field select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .check { display: flex; align-items: center; gap: 8px; margin: 12px 0; font-size: 12px; }
 .check input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }

@@ -21,3 +21,9 @@ In the geometry fixture, Load content examples → Fit nodes. Scroll over the Lo
 On Board, wheel still pans and Ctrl/Cmd+wheel zooms. Canvas shortcuts do not run inside node editors or dialogs.
 
 These are development-only HTML entry points; Vite's production entry remains the root index.html.
+
+## Assistant Phase 1
+
+The assistant fixture uses mocked fetch and synthetic workshop notes. It covers New tree, Place in map, Under selected, subtree checkboxes, placement search/re-parenting, Restore, Regenerate/Tweak, cancellation and invalid responses, and local preset/history controls. Add `?indexeddb` to use the isolated `infiniboard-assistant-verification` library and verify persistence across reloads. This never reads the production assistant library or stores a real credential.
+
+For a production boundary check, run `npm run build` and `npm run preview` on a disposable origin, open Graph → Assistant, and verify there is no Assistant verification harness. `dist` must contain neither fixture entry points nor harness strings.

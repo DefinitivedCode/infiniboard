@@ -51,6 +51,7 @@ Sticky swatches are content colors, not interface accents: oat #efe3b0, sage #d4
 - Graph header: visible Organize text with the branch icon beside history/Snap. Enabled for nonempty graphs; arrangement is an explicit, undoable action and never runs during manual editing.
 - Graph Context: visible Context text and file icon in the header. Flat native dialog, opaque paper backdrop, read-only mono textarea, Copy with inline status and Close. No AI request or editable rich text.
 - Graph assistant: a small branch-icon button at bottom right opens a 408px flat side panel. Header and Apply/Discard footer stay visible while notes and outline scroll. Preview uses indented hairline branches, size markers, and expandable original omissions. Settings use an opaque native dialog with masked key input. No sparkle icon, shadows, or decorative loading effects.
+- Assistant mode is the first segmented control: New tree / Place in map / Under selected. Scope strip, notes, native preset select, collapsed Options, spelling/omission checks, instruction and token estimate/Generate precede the in-panel preview. Placement confidence uses plain mono text; parent search filters a native select. Preview checkboxes control whole subtrees; Apply/Discard stay pinned. Preset management and local history use compact disclosures and hairline separators.
 - Theme changes preserve readable content through semantic swatches, not blanket inversion.
 
 ## Interaction and accessibility
