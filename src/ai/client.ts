@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { SYSTEM_PROMPT } from './prompt'
+import { buildRules, SYSTEM_PROMPT } from './prompt'
 import { outputSchema, ProposalError, validateProposal } from './schema'
 import type { Mode, Options, Proposal } from './schema'
 import type { AiSettings } from './settings'
@@ -30,11 +30,25 @@ function httpError(status: number): AiError {
   return new AiError('OpenAI could not complete the request. Try again later.')
 }
 export type GenerationInput = { text: string; instruction: string; options: Options; mode: Mode }
+export function generationMessage(input: GenerationInput): string {
+  const mode = input.mode
+  return JSON.stringify({
+    mode: mode.kind === 'build' ? { mode: 'build', rootCount: 1 } : mode.kind === 'expand' ? { mode: 'expand', attachmentParentId: mode.selectedId } : { mode: 'place' },
+    ...(mode.kind === 'build' ? {} : { existingGraph: mode.kind === 'place' ? mode.context : mode.context ?? [{ id: mode.selectedId, parentId: null, depth: 0, title: mode.title, body: mode.body.slice(0, 160) }] }),
+    notes: input.text, instruction: input.instruction, options: input.options, rules: buildRules(input.options, mode.kind),
+  })
+}
+export function estimateGeneration(input: GenerationInput, model: string) {
+  const tokens = Math.ceil((SYSTEM_PROMPT.length + generationMessage(input).length) / 4)
+  const output = (input.options.maxNodes ?? 60) * (input.options.detail === 'detailed' ? 180 : input.options.detail === 'titles' ? 65 : 110)
+  return { tokens, output, cost: receiptFor({ input_tokens: tokens, output_tokens: output }, model).cost,
+    scopeCount: input.mode.kind === 'build' ? 0 : input.mode.context?.length ?? 1 }
+}
 export async function generateMap(input: GenerationInput, settings: AiSettings, signal: AbortSignal, onReceipt: (receipt: Receipt) => void, request: typeof fetch = fetch): Promise<Proposal> {
   if (!settings.apiKey.trim()) throw new AiError('Add your OpenAI API key in AI settings before generating.')
   if (!input.text.trim()) throw new AiError('Paste some notes before generating.')
   if (input.text.length > 200000) throw new AiError('These notes are too long. Use fewer than 200,000 characters per map.')
-  const message = JSON.stringify({ mode: input.mode.kind === 'expand' ? { mode: 'expand', selectedNode: { title: input.mode.title, body: input.mode.body }, attachmentParentId: 'SELECTED' } : { mode: 'build', rootCount: 1 }, notes: input.text, instruction: input.instruction, options: input.options })
+  const message = generationMessage(input)
   for (let attempt = 0; attempt < 2; attempt++) {
     signal.throwIfAborted()
     let response: Response
@@ -42,7 +56,7 @@ export async function generateMap(input: GenerationInput, settings: AiSettings, 
       response = await request(RESPONSES_URL, { method: 'POST', signal, credentials: 'omit', redirect: 'error', referrerPolicy: 'no-referrer',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${settings.apiKey}` },
         body: JSON.stringify({ model: settings.model, reasoning: { effort: settings.effort }, store: false, max_output_tokens: 16000,
-          input: [{ role: 'system', content: SYSTEM_PROMPT }, { role: 'user', content: message }, ...(attempt ? [{ role: 'user', content: 'The previous response failed validation. Return a complete map with unique IDs, no missing parents or cycles, the required root/SELECTED attachment, original omitted text, and only cross-branch links. Respect the supplied options.' }] : [])],
+          input: [{ role: 'system', content: SYSTEM_PROMPT }, { role: 'user', content: message }, ...(attempt ? [{ role: 'user', content: 'The previous response failed validation. Return unique new IDs, valid parents without cycles, the required root/attachment, original omitted text, valid alreadyInMap IDs, placement reason/confidence, and only allowed cross-branch links. Respect every supplied rule, especially maxNodes.' }] : [])],
           text: { format: { type: 'json_schema', name: 'mind_map', strict: true, schema: outputSchema } },
         }),
       })
@@ -65,7 +79,7 @@ export async function generateMap(input: GenerationInput, settings: AiSettings, 
     } catch (error) {
       signal.throwIfAborted()
       if (error instanceof AiError) throw error
-      if (attempt === 1) throw new AiError('OpenAI returned an invalid map twice. Nothing was added. Try shorter notes or different instructions.')
+      if (attempt === 1) throw new AiError(`OpenAI returned an invalid map twice. Nothing was added.${error instanceof ProposalError ? ` ${error.message}` : ' Try shorter notes or different instructions.'}`)
     }
   }
   throw new AiError('The map could not be generated.')

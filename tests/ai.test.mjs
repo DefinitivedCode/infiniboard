@@ -13,7 +13,7 @@ const { SYSTEM_PROMPT } = require('../.verification/unit/src/ai/prompt.js')
 const { serializeProject, parseProjectFile } = require('../.verification/unit/src/data/projectFile.js')
 const { fitNodeContent, contentHeight } = require('../.verification/unit/src/graph/contentSize.js')
 const { MAX_SIZE, MIN_SIZE, nodeSizeStep } = require('../.verification/unit/src/graph/model.js')
-const options = { fixSpelling: true, omitRepeatsAndOffTopic: true }
+const options = { fixSpelling: true, omitRepeatsAndOffTopic: true, maxNodes: 500 }
 const build = { kind: 'build' }
 const node = (id, parentId, importance = 2) => ({ id, parentId, title: id, body: '', importance })
 const sample = () => ({ nodes: [node('root', null, 4), node('a', 'root', 3), node('b', 'root', 3), node('detail', 'a')], links: [{ fromId: 'detail', toId: 'b', label: 'supports' }], omitted: [{ text: 'anyway', reason: 'filler' }, { text: 'same point again', reason: 'repeat' }] })

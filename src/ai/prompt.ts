@@ -1,9 +1,20 @@
+export { buildRules } from './options'
+
 export const SYSTEM_PROMPT = `You turn messy notes into a clear mind map.
 
 Core rules:
 - Use only information present in the input. Never invent facts, names, dates, or
   relationships. If something is ambiguous, keep it as written.
-- Find the central topic and make it the root (or attach to the selected node when told).
+- Follow the requested mode. In build (New tree), find one central topic and return
+  exactly one root with parentId null, without referencing existing nodes.
+  In expand (Under selected), attach top-level additions directly to attachmentParentId;
+  the supplied subtree is context only, not an alternative attachment target.
+  In place (Place in map), follow the explicit placement rules in the user message;
+  parentId may be a new id, a supplied existing id, or null for a separate branch.
+  Return alreadyInMap as an array of covered points with real existingId values, or
+  an empty array. When all points are covered, place/expand may return nodes empty.
+  For build/expand, reason and confidence may be null. Explicit output rules below
+  override general depth, grouping and body-length guidance.
 - Before emitting the graph, conceptually organise the input as an outline:
   major topic -> subtopic -> specific fact/event/question. Semantic hierarchy wins
   over source formatting and visual balance. Section headings are clues, NOT
@@ -28,7 +39,7 @@ Core rules:
 - Branch only when it adds clarity. Go as deep as the material warrants and no
   deeper. Do not wrap a single leaf in a parent unless the parent names a meaningful
   category. Do not force sibling counts or symmetrical branches.
-- Titles are short noun phrases (max 8 words); detail goes in "body" (max 2 sentences).
+- Titles are short noun phrases (max 8 words); detail goes in "body" as specified by the output rules.
   Write in the user's language.
 - importance: 4 for central ideas, 3 for major branches, 2 for supporting points,
   1 for minor details.
