@@ -52,7 +52,7 @@ export function App() {
     document.documentElement.dataset.theme = theme
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--paper').trim())
   }, [theme])
-  useEffect(() => { document.title = `${title || 'Untitled project'} — Infiniboard` }, [title])
+  useEffect(() => { document.title = `${title || 'Untitled project'} | IB` }, [title])
   const snapshot = () => { api.current?.flushViewport(); return useProject.getState().project }
   const importProject = (project: Project) => {
     // Flush old canvas cleanup before replacing its data, then mount at imported viewports.
