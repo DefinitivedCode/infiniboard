@@ -67,9 +67,23 @@ function boardItem(item: ObjectValue) {
     fields(item, [...base, 'start', 'end'], name)
     point(item.start, 'line start', true); point(item.end, 'line end', true)
   } else if (item.type === 'pen') {
-    fields(item, [...base, 'points'], name)
+    fields(item, [...base, 'points', 'curves'], name)
     requireValue(Array.isArray(item.points) && item.points.length > 0, 'The file has an invalid pen stroke.')
     item.points.forEach(p => point(p, 'pen point', true))
+    if (item.curves !== undefined) {
+      requireValue(Array.isArray(item.curves), 'The file has invalid pen curves.')
+      item.curves.forEach((value, i) => {
+        const curve = object(value, 'pen curve')
+        fields(curve, ['start', 'control1', 'control2', 'end'], 'pen curve')
+        for (const key of ['start', 'control1', 'control2', 'end']) point(curve[key], `pen curve ${key}`, true)
+        const start = curve.start as { x: number; y: number }
+        if (i > 0) {
+          const previous = (item.curves as ObjectValue[])[i - 1].end as { x: number; y: number }
+          requireValue(start.x === previous.x && start.y === previous.y, 'The file has a disconnected pen curve.')
+        }
+      })
+      requireValue(item.curves.length > 0 || item.points.length === 1, 'The file has an empty pen curve.')
+    }
   } else throw new Error('The file contains an unsupported Board item type.')
   if (item.type === 'sticky' || item.type === 'rect' || item.type === 'ellipse') {
     requireValue(typeof item.swatch === 'string' && ['oat', 'sage', 'rose', 'paper', ...(item.type === 'sticky' ? [] : ['none'])].includes(item.swatch), 'The file has an invalid Board fill color.')

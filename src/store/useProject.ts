@@ -1,9 +1,10 @@
 import { create } from 'zustand'
 import { createProject } from '../data/types'
 import { fitTextHeight } from '../board/textHeight'
-import type { BoardItem, Project, Swatch, Theme, Viewport } from '../data/types'
+import { eraseStrokePath } from '../board/eraser'
+import type { BoardItem, Point, Project, Swatch, Theme, Viewport } from '../data/types'
 
-export type Tool = 'select' | 'hand' | BoardItem['type']
+export type Tool = 'select' | 'hand' | 'eraser' | BoardItem['type']
 export type SaveStatus = 'loading' | 'saved' | 'pending' | 'saving' | 'error'
 type Content = Project['board']
 type Snapshot = Pick<Content, 'items' | 'order'>
@@ -32,7 +33,9 @@ interface ProjectState {
   setEditing: (id: string | null) => void
   setDraft: (item: BoardItem | null) => void
   setMarquee: (bounds: ProjectState['marquee']) => void
-  addItems: (items: BoardItem[]) => void
+  addItems: (items: BoardItem[], selectAdded?: boolean) => void
+  eraseStrokes: (from: Point, to: Point, radius: number) => void
+  eraseStrokePath: (points: readonly Point[], radius: number) => void
   updateItems: (items: BoardItem[], historical?: boolean) => void
   deleteSelected: () => void
   duplicateSelected: () => void
@@ -60,15 +63,22 @@ export const useProject = create<ProjectState>((set, get) => ({
     if (previous.x === viewport.x && previous.y === viewport.y && previous.zoom === viewport.zoom) return s
     return { project: timestamp({ ...s.project, board: { ...s.project.board, viewport } }) }
   }),
-  setTool: tool => set({ tool, editing: null }),
+  setTool: tool => set({ tool, editing: null, ...(tool === 'pen' || tool === 'eraser' ? { selected: [] } : {}) }),
   select: selected => set({ selected }),
   setEditing: editing => set({ editing }),
   setDraft: draft => set({ draft }),
   setMarquee: marquee => set({ marquee }),
-  addItems: additions => set(s => {
+  addItems: (additions, selectAdded = true) => set(s => {
+    if (!additions.length) return s
     const items = { ...s.project.board.items }
     additions.forEach(item => { items[item.id] = fitTextHeight(item) })
-    return { project: timestamp({ ...s.project, board: { ...s.project.board, items, order: [...s.project.board.order, ...additions.map(item => item.id)] } }), past: history(s.past, snapshot(s.project)), future: [], selected: additions.map(item => item.id) }
+    return { project: timestamp({ ...s.project, board: { ...s.project.board, items, order: [...s.project.board.order, ...additions.map(item => item.id)] } }), past: history(s.past, snapshot(s.project)), future: [], ...(selectAdded ? { selected: additions.map(item => item.id) } : {}) }
+  }),
+  eraseStrokes: (from, to, radius) => get().eraseStrokePath([from, to], radius),
+  eraseStrokePath: (points, radius) => set(s => {
+    const result = eraseStrokePath(s.project.board.items, s.project.board.order, points, radius)
+    if (!result.changed) return s
+    return { project: timestamp({ ...s.project, board: { ...s.project.board, items: result.items, order: result.order } }), selected: s.selected.filter(id => result.items[id]) }
   }),
   updateItems: (updates, historical = true) => set(s => {
     if (!updates.length || updates.every(item => s.project.board.items[item.id] === item)) return s
@@ -111,11 +121,13 @@ export const useProject = create<ProjectState>((set, get) => ({
     }
   }),
   undo: () => set(s => {
+    if (s.gesture || s.draft) return s
     const previous = s.past.at(-1)
     if (!previous) return s
     return { project: timestamp({ ...s.project, board: { ...s.project.board, ...previous } }), past: s.past.slice(0, -1), future: [...s.future, snapshot(s.project)], selected: s.selected.filter(id => previous.items[id]), editing: null }
   }),
   redo: () => set(s => {
+    if (s.gesture || s.draft) return s
     const next = s.future.at(-1)
     if (!next) return s
     return { project: timestamp({ ...s.project, board: { ...s.project.board, ...next } }), past: history(s.past, snapshot(s.project)), future: s.future.slice(0, -1), selected: s.selected.filter(id => next.items[id]), editing: null }

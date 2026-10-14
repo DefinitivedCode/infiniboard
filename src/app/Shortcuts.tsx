@@ -14,7 +14,7 @@ const common = [
 
 const boardShortcuts = [
   ['Wheel / Shift + wheel', 'Pan / horizontal pan'], ['Ctrl/Cmd + wheel', 'Zoom about pointer'],
-  ['T / S', 'Text / sticky note'], ['R / O', 'Rectangle / ellipse'], ['L / A / P', 'Line / arrow / pen'],
+  ['T / S', 'Text / sticky note'], ['R / O', 'Rectangle / ellipse'], ['L / A', 'Line / arrow'], ['P / E', 'Pen / eraser'],
   ['Shift + draw', 'Constrain shapes / line angle'], ['Shift + resize', 'Keep proportions'], ['Escape during drag', 'Cancel Board gesture'],
 ]
 const graphShortcuts = [

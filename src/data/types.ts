@@ -9,7 +9,9 @@ export type StickyItem = ItemBase & { type: 'sticky'; text: string; swatch: Swat
 export type ShapeItem = ItemBase & { type: 'rect' | 'ellipse'; swatch: Swatch | 'none' }
 // Stroke coordinates are normalized to the item's box, making group resizing uniform.
 export type LineItem = ItemBase & { type: 'line' | 'arrow'; start: Point; end: Point }
-export type PenItem = ItemBase & { type: 'pen'; points: Point[] }
+export type CubicSegment = { start: Point; control1: Point; control2: Point; end: Point }
+// Legacy strokes use points. Eraser fragments may retain exact normalized curves.
+export type PenItem = ItemBase & { type: 'pen'; points: Point[]; curves?: CubicSegment[] }
 export type BoardItem = TextItem | StickyItem | ShapeItem | LineItem | PenItem
 export type GraphNode = Point & { id: string; title: string; body: string; width: number; height: number; importance?: 1 | 2 | 3 | 4 }
 export type GraphEdge = { id: string; source: string; target: string; sourceHandle?: string; targetHandle?: string; label?: string }

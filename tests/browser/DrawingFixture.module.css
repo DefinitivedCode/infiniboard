@@ -1,0 +1,9 @@
+.comparison { padding: 20px; }
+.comparison h1 { font: 24px var(--serif); margin: 0 0 8px; }
+.comparison p { font-size: 12px; color: var(--muted); }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.columns section { border: 1px solid var(--line); padding: 12px; }
+.columns h2 { font: 18px var(--serif); margin: 0 0 12px; }
+.samples { height: 660px; position: relative; }
+.sample { position: absolute; }
+.sample svg { display: block; overflow: visible; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }

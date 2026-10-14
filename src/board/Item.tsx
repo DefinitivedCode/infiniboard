@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import type { BoardItem } from '../data/types'
 import { useProject } from '../store/useProject'
+import { strokePath } from './strokes'
 import styles from './Board.module.css'
 
 export function ItemVisual({ item }: { item: BoardItem }) {
@@ -19,7 +20,11 @@ export function ItemVisual({ item }: { item: BoardItem }) {
     return <svg className={styles.drawing} width={width} height={height}><path className={styles.hitStroke} d={`M${x1},${y1} L${x2},${y2}`} /><path d={`M${x1},${y1} L${x2},${y2}`} />{item.type === 'arrow' && <path d={head} />}</svg>
   }
   if (item.type === 'pen') {
-    const d = item.points.map((point, i) => `${i ? 'L' : 'M'}${point.x * width},${point.y * height}`).join(' ')
+    const d = strokePath(item)
+    if (!d) {
+      const point = item.points[0]
+      return <svg className={styles.drawing} width={width} height={height}><circle className={styles.hitStroke} cx={point.x * width} cy={point.y * height} r="calc(7px * var(--inverse-zoom))" fill="transparent" style={{ strokeWidth: 0 }} /><circle cx={point.x * width} cy={point.y * height} r={1} fill="var(--ink)" stroke="none" /></svg>
+    }
     return <svg className={styles.drawing} width={width} height={height}><path className={styles.hitStroke} d={d} /><path d={d} /></svg>
   }
 }

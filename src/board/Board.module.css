@@ -3,6 +3,12 @@
 .stage[data-dragging='true'] { cursor: grabbing; }
 .stage[data-tool='text'] { cursor: text; }
 .stage[data-tool='sticky'], .stage[data-tool='rect'], .stage[data-tool='ellipse'], .stage[data-tool='line'], .stage[data-tool='arrow'], .stage[data-tool='pen'] { cursor: crosshair; }
+.stage[data-tool='eraser'] { cursor: none; }
+.stage[data-tool='eraser'][data-space='true'] { cursor: grab; }
+.stage[data-tool='eraser'][data-dragging='true'] { cursor: grabbing; }
+.eraserCursor { position: absolute; top: 0; left: 0; width: 28px; height: 28px; border: 1px solid var(--ink); outline: 1px solid var(--paper); border-radius: 50%; pointer-events: none; display: none; }
+.stage[data-tool='eraser']:not([data-space='true']):not([data-dragging='true']) .eraserCursor[data-visible='true'] { display: block; }
+.stage[data-tool='pen'] .item, .stage[data-tool='eraser'] .item, .stage[data-tool='pen'] .drawing path, .stage[data-tool='eraser'] .drawing path, .stage[data-tool='pen'] .drawing circle.hitStroke, .stage[data-tool='eraser'] .drawing circle.hitStroke { pointer-events: none; }
 .grid { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .world { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
 .empty { position: absolute; top: 32px; left: 92px; color: var(--muted); pointer-events: none; }
@@ -21,6 +27,7 @@
 .drawing { overflow: visible; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; display: block; }
 .drawing path { pointer-events: stroke; }
 .drawing .hitStroke { stroke: transparent; stroke-width: calc(14px * var(--inverse-zoom)); }
+.drawing circle.hitStroke { pointer-events: all; }
 .item[data-multi='true']:not(.strokeItem) { outline: calc(1px * var(--inverse-zoom)) solid var(--accent); outline-offset: calc(2px * var(--inverse-zoom)); }
 .textEditor { color: inherit; background: transparent; padding: 0; border: 0; border-radius: 0; width: 100%; height: 100%; resize: none; outline: none !important; line-height: 1.45; display: block; overflow: hidden; overflow-wrap: anywhere; user-select: text; }
 .selection { position: absolute; top: 0; left: 0; border: calc(1px * var(--inverse-zoom)) solid var(--accent); pointer-events: none; }
@@ -31,5 +38,5 @@
 .sw { top: 100%; left: 0; cursor: nesw-resize; }
 .marquee { position: absolute; border: calc(1px * var(--inverse-zoom)) solid var(--accent); background: color-mix(in srgb, var(--accent) 9%, transparent); pointer-events: none; }
 .draft { pointer-events: none; opacity: .7; }
-.draft .drawing path { pointer-events: none; }
+.draft .drawing path, .draft .drawing circle.hitStroke { pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .world { will-change: auto; } }

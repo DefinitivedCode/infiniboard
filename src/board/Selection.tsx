@@ -7,8 +7,9 @@ export function Selection() {
   const selected = useProject(s => s.selected)
   const items = useProject(s => s.project.board.items)
   const editing = useProject(s => s.editing)
+  const tool = useProject(s => s.tool)
   const bounds = boundsOf(selected.flatMap(id => items[id] ? [items[id]] : []))
-  if (!bounds || editing) return null
+  if (!bounds || editing || tool !== 'select') return null
   return <div className={styles.selection} style={{ transform: `translate(${bounds.x}px, ${bounds.y}px)`, width: Math.max(1, bounds.width), height: Math.max(1, bounds.height) }}>
     {['nw', 'ne', 'se', 'sw'].map(handle => <span key={handle} data-handle={handle} className={`${styles.handle} ${styles[handle]}`} />)}
   </div>

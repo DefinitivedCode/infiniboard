@@ -11,6 +11,7 @@ const hints: Record<Tool, string> = {
   text: 'Click to add text · Drag for a custom text box', sticky: 'Click to add a note · Drag for a custom size',
   rect: 'Drag a rectangle · Shift for a square', ellipse: 'Drag an ellipse · Shift for a circle',
   line: 'Drag a line · Shift to constrain angle', arrow: 'Drag an arrow · Shift to constrain angle', pen: 'Draw freely · Escape to cancel stroke',
+  eraser: 'Drag to erase freehand strokes · Escape to cancel erasing',
 }
 
 export function StatusBar({ api, board }: { api: RefObject<BoardApi | null>; board: boolean }) {

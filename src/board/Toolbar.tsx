@@ -14,6 +14,7 @@ const tools: { tool: Tool; icon: IconName; label: string; key: string }[] = [
   { tool: 'line', icon: 'line', label: 'Line', key: 'L' },
   { tool: 'arrow', icon: 'arrow', label: 'Arrow', key: 'A' },
   { tool: 'pen', icon: 'pen', label: 'Pen', key: 'P' },
+  { tool: 'eraser', icon: 'eraser', label: 'Eraser', key: 'E' },
 ]
 
 export function Toolbar() {

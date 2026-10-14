@@ -8,15 +8,18 @@ import type { Bounds } from './geometry'
 import { Item } from './Item'
 import { ignoreShortcut } from '../app/keyboard'
 import { Draft, Marquee, Selection } from './Selection'
+import { createPenItem } from './strokes'
 import styles from './Board.module.css'
 
 export interface BoardApi { zoom: (factor: number) => void; fit: () => void; resetZoom: () => void; flushViewport: () => void }
-type DrawingTool = Exclude<Tool, 'select' | 'hand'>
+type DrawingTool = BoardItem['type']
+const ERASER_RADIUS = 14 // Screen pixels; convert only when hit-testing in world coordinates.
 type Gesture =
   | { type: 'pan'; client: Point; viewport: Viewport }
   | { type: 'move'; anchor: Point; items: BoardItem[]; bounds: Bounds; moved: boolean }
   | { type: 'resize'; anchor: Point; items: BoardItem[]; bounds: Bounds; handle: string; moved: boolean }
   | { type: 'marquee'; anchor: Point; original: string[] }
+  | { type: 'erase'; previous: Point; samples: Point[] }
   | { type: 'create'; anchor: Point; tool: DrawingTool; id: string; points: Point[]; moved: boolean }
 
 function newItem(tool: DrawingTool, id: string, anchor: Point, end: Point, click: boolean, points: Point[]): BoardItem {
@@ -32,14 +35,7 @@ function newItem(tool: DrawingTool, id: string, anchor: Point, end: Point, click
     const finish = click ? { x: 1, y: 0 } : { x: (end.x - box.x) / box.width, y: (end.y - box.y) / box.height }
     return { ...base, type: tool, start, end: finish }
   }
-  const strokePoints = points.length > 1 ? points : [anchor, { x: anchor.x + .1, y: anchor.y + .1 }]
-  const xs = strokePoints.map(p => p.x)
-  const ys = strokePoints.map(p => p.y)
-  const x = Math.min(...xs)
-  const y = Math.min(...ys)
-  const width = Math.max(1, Math.max(...xs) - x)
-  const height = Math.max(1, Math.max(...ys) - y)
-  return { id, type: 'pen', x, y, width, height, points: strokePoints.map(p => ({ x: (p.x - x) / width, y: (p.y - y) / height })) }
+  return createPenItem(id, points)
 }
 
 export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
@@ -52,6 +48,8 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
   const dot = useRef<SVGCircleElement>(null)
   const viewport = useRef(useProject.getState().project.board.viewport)
   const gesture = useRef<Gesture | null>(null)
+  const activePointer = useRef<number | null>(null)
+  const eraserCursor = useRef<HTMLDivElement>(null)
   const lastPointerItem = useRef<string | null>(null)
   const space = useRef(false)
   const publishTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -84,13 +82,13 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
   }
   const zoomCenter = (factor: number, absolute?: number) => {
     const el = stage.current
-    if (!el) return
+    if (!el || gesture.current) return
     paintViewport(zoomAt(viewport.current, { x: el.clientWidth / 2, y: el.clientHeight / 2 }, absolute ?? viewport.current.zoom * factor))
     publishViewport()
   }
   const fit = () => {
     const el = stage.current
-    if (!el) return
+    if (!el || gesture.current) return
     const s = useProject.getState()
     const ids = s.selected.length ? s.selected : s.project.board.order
     const bounds = boundsOf(ids.flatMap(id => s.project.board.items[id] ? [s.project.board.items[id]] : []))
@@ -100,6 +98,21 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
     publishViewport()
   }
   useImperativeHandle(apiRef, () => ({ zoom: zoomCenter, fit, resetZoom: () => zoomCenter(1, 1), flushViewport: publishViewport }))
+
+  const cancelGesture = () => {
+    const current = gesture.current
+    gesture.current = null
+    nextPointer.current = null
+    if (frame.current !== undefined) cancelAnimationFrame(frame.current)
+    frame.current = undefined
+    if (current?.type === 'pan') { paintViewport(current.viewport); publishViewport() }
+    if (current?.type === 'marquee') useProject.getState().select(current.original)
+    useProject.getState().endGesture(true)
+    const pointerId = activePointer.current
+    activePointer.current = null
+    if (pointerId !== null && stage.current?.hasPointerCapture(pointerId)) stage.current.releasePointerCapture(pointerId)
+    if (stage.current) delete stage.current.dataset.dragging
+  }
 
   useEffect(() => {
     const el = stage.current!
@@ -124,12 +137,7 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
       const key = e.key.toLowerCase()
       if (e.code === 'Space') { e.preventDefault(); space.current = true; el.dataset.space = 'true'; return }
       if (key === 'escape') {
-        if (gesture.current) {
-          if (gesture.current.type === 'pan') { paintViewport(gesture.current.viewport); publishViewport() }
-          gesture.current = null; nextPointer.current = null
-          if (frame.current !== undefined) cancelAnimationFrame(frame.current)
-          frame.current = undefined; s.endGesture(true)
-        }
+        cancelGesture()
         s.select([]); s.setEditing(null); s.setTool('select'); delete el.dataset.dragging; return
       }
       if (gesture.current) return
@@ -152,7 +160,7 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
         return
       }
       if (mod || e.altKey) return
-      const tools: Record<string, Tool> = { v: 'select', h: 'hand', t: 'text', s: 'sticky', r: 'rect', o: 'ellipse', l: 'line', a: 'arrow', p: 'pen' }
+      const tools: Record<string, Tool> = { v: 'select', h: 'hand', t: 'text', s: 'sticky', r: 'rect', o: 'ellipse', l: 'line', a: 'arrow', p: 'pen', e: 'eraser' }
       if (tools[key]) { e.preventDefault(); s.setTool(tools[key]) }
       if (key === 'g') { e.preventDefault(); s.toggleSnap() }
       if (key === 'f') { e.preventDefault(); fit() }
@@ -163,12 +171,11 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
     const keyUp = (e: KeyboardEvent) => { if (e.code === 'Space') { space.current = false; delete el.dataset.space } }
     const blur = () => {
       space.current = false; delete el.dataset.space
-      if (gesture.current) {
-        if (gesture.current.type === 'pan') { paintViewport(gesture.current.viewport); publishViewport() }
-        gesture.current = null; nextPointer.current = null; sCancel(); delete el.dataset.dragging
-      }
+      if (gesture.current) cancelGesture()
     }
-    const sCancel = () => useProject.getState().endGesture(true)
+    const unsubscribe = useProject.subscribe((state, previous) => {
+      if (state.tool !== previous.tool && gesture.current) cancelGesture()
+    })
     window.addEventListener('keydown', keyDown)
     window.addEventListener('keyup', keyUp)
     window.addEventListener('blur', blur)
@@ -177,18 +184,44 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
       window.removeEventListener('keydown', keyDown)
       window.removeEventListener('keyup', keyUp)
       window.removeEventListener('blur', blur)
+      unsubscribe()
       clearTimeout(publishTimer.current)
-      if (frame.current !== undefined) cancelAnimationFrame(frame.current)
-      if (gesture.current) useProject.getState().endGesture(true)
+      cancelGesture()
       useProject.getState().setViewport({ ...viewport.current })
     }
     // This controller deliberately reads live state and refs instead of subscribing to viewport changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const showEraserCursor = (client: Point) => {
+    const cursor = eraserCursor.current
+    if (!cursor || useProject.getState().tool !== 'eraser') return
+    const point = localPoint(client)
+    cursor.style.transform = `translate(${point.x - ERASER_RADIUS}px, ${point.y - ERASER_RADIUS}px)`
+    cursor.dataset.visible = 'true'
+  }
+
+  // Record all samples immediately; only preview rendering is batched to the display frame.
+  const captureDrawingSamples = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const current = gesture.current
+    if (!current || (current.type !== 'erase' && !(current.type === 'create' && current.tool === 'pen'))) return
+    const samples = [...(e.nativeEvent.getCoalescedEvents?.() ?? []), e.nativeEvent]
+    for (const sample of samples) {
+      const point = worldPoint(localPoint({ x: sample.clientX, y: sample.clientY }), viewport.current)
+      if (current.type === 'erase') {
+        const last = current.samples.at(-1) ?? current.previous
+        if (point.x !== last.x || point.y !== last.y) current.samples.push(point)
+      } else {
+        const last = current.points.at(-1)!
+        if (Math.hypot(point.x - last.x, point.y - last.y) * viewport.current.zoom >= .25) current.points.push(point)
+      }
+    }
+  }
+
   const pointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0 && e.button !== 1) return
+    if ((e.button !== 0 && e.button !== 1) || !e.isPrimary) return
     if ((e.target as HTMLElement).closest('textarea') || gesture.current) return
+    e.preventDefault()
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
     stage.current?.focus({ preventScroll: true })
     const state = useProject.getState()
@@ -196,19 +229,29 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
     const client = { x: e.clientX, y: e.clientY }
     const point = worldPoint(localPoint(client), viewport.current)
     e.currentTarget.setPointerCapture(e.pointerId)
+    activePointer.current = e.pointerId
     if (space.current || e.button === 1 || state.tool === 'hand') {
       e.preventDefault(); gesture.current = { type: 'pan', client, viewport: { ...viewport.current } }; e.currentTarget.dataset.dragging = 'true'; return
     }
     const handle = (e.target as HTMLElement).closest<HTMLElement>('[data-handle]')?.dataset.handle
     const selectedItems = state.selected.flatMap(id => state.project.board.items[id] ? [state.project.board.items[id]] : [])
     const selectedBounds = boundsOf(selectedItems)
-    if (handle && selectedBounds) {
+    if (state.tool === 'select' && handle && selectedBounds) {
       state.beginGesture(); gesture.current = { type: 'resize', anchor: point, items: selectedItems, bounds: selectedBounds, handle, moved: false }; return
+    }
+    if (state.tool === 'eraser') {
+      state.select([])
+      state.beginGesture()
+      gesture.current = { type: 'erase', previous: point, samples: [] }
+      state.eraseStrokes(point, point, ERASER_RADIUS / viewport.current.zoom)
+      showEraserCursor(client)
+      return
     }
     if (state.tool !== 'select') {
       const anchor = state.tool === 'pen' ? point : { x: snap(point.x, grid), y: snap(point.y, grid) }
       gesture.current = { type: 'create', anchor, tool: state.tool, id: crypto.randomUUID(), points: [point], moved: false }
       state.select([])
+      if (state.tool === 'pen') state.setDraft(createPenItem(gesture.current.id, [point]))
       return
     }
     const id = (e.target as HTMLElement).closest<HTMLElement>('[data-item-id]')?.dataset.itemId
@@ -231,6 +274,14 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
     const state = useProject.getState()
     if (current.type === 'pan') {
       paintViewport({ ...current.viewport, x: current.viewport.x + client.x - current.client.x, y: current.viewport.y + client.y - current.client.y }); return
+    }
+    if (current.type === 'erase') {
+      if (current.samples.length) {
+        state.eraseStrokePath([current.previous, ...current.samples], ERASER_RADIUS / viewport.current.zoom)
+        current.previous = current.samples[current.samples.length - 1]
+      }
+      current.samples = []
+      return
     }
     const point = worldPoint(localPoint(client), viewport.current)
     const snapping = state.project.settings.snap
@@ -278,25 +329,16 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
           end = { x: current.anchor.x + Math.cos(angle) * distance, y: current.anchor.y + Math.sin(angle) * distance }
         } else end = { x: current.anchor.x + Math.sign(dx || 1) * length, y: current.anchor.y + Math.sign(dy || 1) * length }
       }
-      if (current.tool === 'pen') {
-        const last = current.points.at(-1)!
-        if (Math.hypot(point.x - last.x, point.y - last.y) > 1 / viewport.current.zoom) current.points.push(point)
-      }
       current.moved ||= Math.hypot(end.x - current.anchor.x, end.y - current.anchor.y) * viewport.current.zoom > 4
       state.setDraft(newItem(current.tool, current.id, current.anchor, end, !current.moved, current.points))
     }
   }
   const pointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (activePointer.current !== null && activePointer.current !== e.pointerId) return
+    showEraserCursor({ x: e.clientX, y: e.clientY })
     if (!gesture.current) return
-    if (gesture.current.type === 'create' && gesture.current.tool === 'pen') {
-      const stroke = gesture.current
-      const samples = e.nativeEvent.getCoalescedEvents?.() ?? []
-      for (const sample of samples) {
-        const point = worldPoint(localPoint({ x: sample.clientX, y: sample.clientY }), viewport.current)
-        const last = stroke.points.at(-1)!
-        if (Math.hypot(point.x - last.x, point.y - last.y) > 1 / viewport.current.zoom) stroke.points.push(point)
-      }
-    }
+    e.preventDefault()
+    captureDrawingSamples(e)
     nextPointer.current = { point: { x: e.clientX, y: e.clientY }, shift: e.shiftKey }
     if (frame.current !== undefined) return
     frame.current = requestAnimationFrame(() => {
@@ -306,12 +348,21 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
     })
   }
   const pointerUp = (e: ReactPointerEvent<HTMLDivElement>, cancel = false) => {
+    if (activePointer.current !== e.pointerId) return
     if (frame.current !== undefined) cancelAnimationFrame(frame.current)
     frame.current = undefined; nextPointer.current = null
     const current = gesture.current
-    if (!current) return
-    if (!cancel) processPointer({ x: e.clientX, y: e.clientY }, e.shiftKey)
+    if (!current) {
+      activePointer.current = null
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
+      return
+    }
+    if (!cancel) {
+      captureDrawingSamples(e)
+      processPointer({ x: e.clientX, y: e.clientY }, e.shiftKey)
+    }
     gesture.current = null
+    activePointer.current = null
     delete e.currentTarget.dataset.dragging
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
     const state = useProject.getState()
@@ -320,7 +371,7 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
       const draft = state.draft
       state.setDraft(null)
       if (!cancel && draft) {
-        state.addItems([draft])
+        state.addItems([draft], draft.type !== 'pen')
         if (draft.type !== 'pen') state.setTool('select')
         if (draft.type === 'text' || draft.type === 'sticky') state.setEditing(draft.id)
       }
@@ -339,9 +390,10 @@ export const Board = forwardRef<BoardApi>(function Board(_, apiRef) {
     state.setEditing(item.id)
   }
 
-  return <div ref={stage} className={styles.stage} data-tool={tool} tabIndex={0} aria-label="Whiteboard canvas" onDoubleClick={doubleClick} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={e => pointerUp(e)} onPointerCancel={e => pointerUp(e, true)} onLostPointerCapture={e => { if (gesture.current) pointerUp(e, true) }}>
+  return <div ref={stage} className={styles.stage} data-tool={tool} tabIndex={0} aria-label="Whiteboard canvas" onDoubleClick={doubleClick} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={e => pointerUp(e)} onPointerCancel={e => pointerUp(e, true)} onLostPointerCapture={e => pointerUp(e, true)} onPointerLeave={() => { if (eraserCursor.current) delete eraserCursor.current.dataset.visible }}>
     <svg className={styles.grid} aria-hidden="true" style={{ display: grid ? 'block' : 'none' }}><defs><pattern ref={pattern} id="board-grid" width="24" height="24" patternUnits="userSpaceOnUse"><circle ref={dot} cx="1" cy="1" r="1" fill="var(--grid)" /></pattern></defs><rect width="100%" height="100%" fill="url(#board-grid)" /></svg>
     {!order.length && <div className={styles.empty}><span>01 / Board</span><p>Choose a tool.</p><small>Click or drag to add text, notes, and shapes.<br />Space + drag to pan. Ctrl/Cmd + wheel to zoom.</small></div>}
     <div ref={world} className={styles.world}>{order.map(id => <Item key={id} id={id} />)}<Draft /><Marquee /><Selection /></div>
+    <div ref={eraserCursor} className={styles.eraserCursor} aria-hidden="true" />
   </div>
 })
